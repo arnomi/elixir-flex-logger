@@ -69,6 +69,8 @@ defmodule FlexLogger do
   @behaviour :gen_event
 
   defmodule State do
+    @moduledoc false
+
     defstruct name: nil, logger: nil, logger_state: nil, level: :info, level_config: [], metadata_filter: []
   end
 
