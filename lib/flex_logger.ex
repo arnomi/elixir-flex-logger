@@ -1,6 +1,6 @@
 defmodule FlexLogger do
   @moduledoc """
-  `FlexLogger` is a flexible logger backend intended to be used with Elixir's `Logger` to add module specific log levels.
+  `FlexLogger` is a flexible logger (backend) adds module/application specific log levels to Elixir's `Logger`.
 
   `FlexLogger` brings the following additions to the table:
 
