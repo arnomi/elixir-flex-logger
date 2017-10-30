@@ -40,7 +40,7 @@ defmodule FlexLogger.Mixfile do
 
   defp package() do
     [
-      files: ["lib", "mix.exs", "README*", "LICENSE*"],
+      files: ["lib", "mix.exs", "README*", "LICENSE*", "CHANGELOG.*"],
       maintainers: ["Arno Mittelbach"],
       licenses: ["MIT"],
       links: %{"GitHub" => "https://github.com/arnomi/elixir-flex-logger"}
