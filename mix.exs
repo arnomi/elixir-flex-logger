@@ -35,7 +35,7 @@ defmodule FlexLogger.Mixfile do
   end
 
   defp description() do
-    "FlexLogger is a flexible logger (backend) adds module/application specific log levels to Elixir's Logger."
+    "FlexLogger is a flexible logger (backend) that adds module/application specific log levels to Elixir's Logger."
   end
 
   defp package() do

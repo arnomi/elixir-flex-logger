@@ -1,6 +1,6 @@
 # FlexLogger
 
-A flexible logger (backend) adds module/application specific log levels to Elixir's `Logger`.
+A flexible logger (backend) that adds module/application specific log levels to Elixir's `Logger`.
 
 ## Installation
 
