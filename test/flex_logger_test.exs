@@ -14,47 +14,61 @@ defmodule FlexLoggerTest do
   end
 
   test "works with console logger with full name" do
-    config [logger: Logger.Backends.Console, level: :debug]
+    config [logger: Logger.Backends.Console, default_level: :debug]
     debug "console logger test"
     :ok
   end
 
   test "works with :console logger" do
-    config [logger: :console, level: :debug]
+    config [logger: :console, default_level: :debug]
     debug "console logger test"
     :ok
   end
 
   test "works with named logger" do
-    config [logger: LoggerMockWithName, level: :debug]
+    config [logger: LoggerMockWithName, default_level: :debug]
     reset()
     debug "test message"
     assert %{:events => [debug: "test message"]} = mock_state()
   end
 
   test "works with unnamed logger" do
-    config [logger: LoggerMockWithoutName, level: :debug]
+    config [logger: LoggerMockWithoutName, default_level: :debug]
     reset()
     debug "test message"
     assert %{:events => [debug: "test message"]} = mock_state()
   end
 
   test "take default level if no specific rule matches" do
-    config [logger: LoggerMockWithoutName, level: :debug, level_config: [module: FooBar, level: :info]]
+    config [logger: LoggerMockWithoutName, default_level: :debug, level_config: [module: FooBar, level: :info]]
     reset()
     debug "test message"
     assert %{:events => [debug: "test message"]} = mock_state()
   end
 
+  test "turn off logging via :off" do
+    config [logger: LoggerMockWithoutName, default_level: :off]
+    reset()
+    debug "test message"
+    assert %{:events => []} = mock_state()
+  end
+
+  test "override :off" do
+    config [logger: LoggerMockWithoutName, default_level: :off, level_config: [module: A, level: :info]]
+    reset()
+    A.info "test message"
+    assert %{:events => [info: "test message"]} = mock_state()
+  end
+
   test "take specific rule overrides default level" do
-    config [logger: LoggerMockWithoutName, level: :debug, level_config: [module: A, level: :info]]
+    config [logger: LoggerMockWithoutName, default_level: :debug, level_config: [module: A, level: :info]]
     reset()
     A.debug "test message"
     assert %{:events => []} = mock_state()
   end
 
   test "take module prefix" do
-    config [logger: LoggerMockWithoutName, level: :debug, level_config: [module: Foo, level: :info]]
+    config [logger: LoggerMockWithoutName, default_level: :debug, level_config: [module: Foo, level: :info]]
     reset()
     Foo.Bar.debug "test message"
     Foo.Bar.info "info"
@@ -62,14 +76,14 @@ defmodule FlexLoggerTest do
   end
 
   test "test application" do
-    config [logger: LoggerMockWithoutName, level: :info, level_config: [application: :flex_logger, level: :debug]]
+    config [logger: LoggerMockWithoutName, default_level: :info, level_config: [application: :flex_logger, level: :debug]]
     reset()
     A.debug "test message"
     assert %{:events => [debug: "test message"]} = mock_state()
   end
 
   test "test override function" do
-    config [logger: LoggerMockWithoutName, level: :debug, level_config: [
+    config [logger: LoggerMockWithoutName, default_level: :debug, level_config: [
                                                   [module: Foo.Bar, function: "debug/1", level: :debug],
                                                   [module: Foo, level: :info]]]
     reset()
@@ -78,7 +92,7 @@ defmodule FlexLoggerTest do
   end
 
   test "test function arity" do
-    config [logger: LoggerMockWithoutName, level: :debug, level_config: [
+    config [logger: LoggerMockWithoutName, default_level: :debug, level_config: [
                                                             [module: Foo.Bar, function: "debug/2", level: :debug],
                                                             [module: Foo, level: :info]]]
     reset()
@@ -86,15 +100,15 @@ defmodule FlexLoggerTest do
   end
 
   test "test order matters" do
-    config [logger: LoggerMockWithoutName, level: :debug, level_config: [[module: Foo, level: :info],
+    config [logger: LoggerMockWithoutName, default_level: :debug, level_config: [[module: Foo, level: :info],
                                                                          [module: Foo.Bar, function: "debug/1", level: :debug]]]
     reset()
     Foo.Bar.debug "test message"
     assert %{:events => []} = mock_state()
   end
 
-  test "test multiple rules" do
-    config [logger: LoggerMockWithoutName, level: :debug, level_config: [[module: Foo, level: :info], [module: A, level: :warn]]]
+  test "multiple rules" do
+    config [logger: LoggerMockWithoutName, default_level: :debug, level_config: [[module: Foo, level: :info], [module: A, level: :warn]]]
     reset()
 
     Foo.Bar.debug "test message"
@@ -102,6 +116,20 @@ defmodule FlexLoggerTest do
     A.warn "warn"
 
     assert %{:events => [warn: "warn"]} = mock_state()
+  end
+
+  test "can set config directly" do
+    reset()
+    config [logger: LoggerMockWithoutName, default_level: :debug, foo: :bar]
+
+    assert %{:configure => [logger: LoggerMockWithoutName, default_level: :debug, foo: :bar]} = mock_state()
+  end
+
+  test "can set config indirectly" do
+    reset()
+    config [logger: LoggerMockWithoutName, default_level: :debug, logger_config: [foo: :bar]]
+
+    assert %{:configure => [foo: :bar]} = mock_state()
   end
 
   defp debug(msg) do

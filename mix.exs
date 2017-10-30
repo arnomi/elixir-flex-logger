@@ -25,7 +25,9 @@ defmodule FlexLogger.Mixfile do
 
   # Type `mix help deps` for more examples and options
   defp deps do
-    [ {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}]
+    [ {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
+      {:credo, "~> 0.8", only: [:dev, :test], runtime: false},
+      {:logger_file_backend, "~> 0.0.10", only: :dev}]
   end
 
   defp package() do

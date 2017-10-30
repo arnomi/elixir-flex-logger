@@ -9,7 +9,7 @@ defmodule LoggerMockWithoutName do
     {:ok, :ok, %{state | :configure => opts}}
   end
 
-  def handle_call(:reset, state) do
+  def handle_call(:reset, _state) do
     {:ok, :ok, %{:events => [], :configure => nil}}
   end
 

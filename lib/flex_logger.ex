@@ -1,5 +1,70 @@
 defmodule FlexLogger do
-  @moduledoc false
+  @moduledoc """
+  `FlexLogger` is a flexible logger backend intended to be used with Elixir's `Logger` to add module specific log levels.
+
+  `FlexLogger` brings the following additions to the table:
+
+    * Configuration of log levels per application, module or even function
+
+    * Possibility of having multiple logger configurations for different applications or modules
+
+  ## Configuration
+
+  `FlexLogger` is configured as a named backend to `Logger`. Following is an example configuration
+  of a single `FlexLogger` in combination with a :console logger
+
+       config :logger,
+         backends: [{FlexLogger, :logger_name}]
+
+       config :logger, :logger_name,
+         logger: :console,
+         default_level: :debug, # this is the loggers default level
+         level_config: [ # override default levels
+           [module: Foo, level: :info]
+         ],
+         format: "DEV $message" # backend specific configuration
+
+  The configuration for `FlexLogger` as well as the underlying actual log backend are under the
+  named config. `FlexLogger` knows the following configuration options:
+
+    * logger: The actual logger backend to use. In case of `Logger.Backend.Console` you can also use the :console shortcut.
+
+    * default_level: The default log level to use. This should be one of [:off, :debug, :info, :warn, :error]. In addition
+      to the standard four log levels the :off level allows to turn of logging for either individual modules or if used
+      as default_level to turn of logging per default to then only enable logging for individual modules or applications
+
+    * level_config: A list of log level configurations for modules and applications. Each entry should be a keyword list.
+      If only a single entry is present the config can be simplified to only a single keyword list like
+
+        level_config: [application: my_app, level: :info]
+
+      Possible configuration options are `:application`, to match the application, `:module` to match a prefix of a module
+      and `:function` to match a particular function. The level is set via `:level`. The following configuration
+
+        level_config: [
+          [application: :my_app, module: Foo.Bar, level: :debug]
+          [function: "some_function/1", level: :error]
+        ]
+
+      would set the log level for any module that starts with `Foo.Bar` in application `:my_app` to :debug. In addition
+      the log level for any function called `some_function` and that has arity 1 is set to `:error`. Note that if a key
+      (ie., :application, :module or :function) is not present then it matches anything.
+
+    * logger_config: If this key is not present then the entire configuration is passed onto the actual logger for configuration.
+      In case the configuration of the logger needs to be further restricted, for example, because both `FlexLogger` and
+      the logger in question are configured via a `level_config` you can use `logger_config` to provide the actual
+      configuration for the logger.
+
+  `Logger` specific configuration, i.e., not backend specific configuration needs to be specified at the usual place,
+  for example
+
+     config :logger,
+        handle_otp_reports: true,
+        handle_sasl_reports: true
+
+  `FlexLogger` has been tested with :console and `LoggerFileBackend` but should also work with other logging backends.
+
+  """
 
   @behaviour :gen_event
 
@@ -58,7 +123,6 @@ defmodule FlexLogger do
   def handle_info(_opts, %{logger: nil} = state), do: {:ok, state}
 
   def handle_info(opts, %{logger: logger, logger_state: logger_state} = state) do
-    IO.puts "foobar"
     {flag, updated_logger_state} =
       logger.handle_info(opts, logger_state)
 
@@ -82,10 +146,10 @@ defmodule FlexLogger do
 
   # helper
 
-  defp should_log?(md, level, log_level, level_config) do
+  defp should_log?(md, level, default_level, level_config) do
     case check_level_configs(md, level, level_config) do
       {:match, do_log?} -> do_log?
-      :no_match -> meet_level?(log_level, level)
+      :no_match -> meet_level?(level, default_level)
     end
   end
 
@@ -135,8 +199,8 @@ defmodule FlexLogger do
   defp matches?(nil, _), do: true
   defp matches?(a, b), do: a == b
 
-  defp matches_prefix?(_, nil), do: false
-  defp matches_prefix?(nil, _), do: false
+  defp matches_prefix?(_, nil), do: true
+  defp matches_prefix?(nil, _), do: true
   defp matches_prefix?(module, module_prefix) when is_atom(module) do
     matches_prefix?(Atom.to_string(module), module_prefix)
   end
@@ -160,20 +224,25 @@ defmodule FlexLogger do
       is_nil(logger) ->
         nil
       old_logger == logger ->
-        {:ok, :ok, updated_logger_state} = logger.handle_call({:configure, opts}, state.logger_state)
-        updated_logger_state
+        update_logger_config(logger, opts, state.logger_state)
       true ->
         {:ok, logger_state} = init_logger(logger, name)
-        logger_state
+        update_logger_config(logger, opts, logger_state)
     end
 
     %State{state |
       name: name,
       logger: logger,
       logger_state: logger_state,
-      level: Keyword.get(opts, :level, :debug),
+      level: Keyword.get(opts, :default_level, :debug),
       level_config: clean_level_config(Keyword.get(opts, :level_config, [])),
     }
+  end
+
+  defp update_logger_config(logger, opts, logger_state) do
+    logger_opts = Keyword.get(opts, :logger_config, opts)
+    {:ok, :ok, updated_logger_state} = logger.handle_call({:configure, logger_opts}, logger_state)
+    updated_logger_state
   end
 
   defp clean_level_config([]), do: []
