@@ -27,33 +27,35 @@ defmodule FlexLogger do
   The configuration for `FlexLogger` as well as the underlying actual log backend are under the
   named config. `FlexLogger` knows the following configuration options:
 
-    * logger: The actual logger backend to use. In case of `Logger.Backend.Console` you can also use the :console shortcut.
+    * `logger:` The actual logger backend to use. In case of `Logger.Backend.Console` you can also use the :console shortcut.
 
-    * default_level: The default log level to use. This should be one of [:off, :debug, :info, :warn, :error]. In addition
+    * `default_level:` The default log level to use. This should be one of [:off, :debug, :info, :warn, :error]. In addition
       to the standard four log levels the :off level allows to turn of logging for either individual modules or if used
       as default_level to turn of logging per default to then only enable logging for individual modules or applications
 
-    * level_config: A list of log level configurations for modules and applications. Each entry should be a keyword list.
+    * `level_config:` A list of log level configurations for modules and applications. Each entry should be a keyword list.
       If only a single entry is present the config can be simplified to only a single keyword list like
 
-        level_config: [application: my_app, level: :info]
+          level_config: [application: :my_app, level: :info]
 
       Possible configuration options are `:application`, to match the application, `:module` to match a prefix of a module
       and `:function` to match a particular function. The level is set via `:level`. The following configuration
 
-        level_config: [
-          [application: :my_app, module: Foo.Bar, level: :debug]
-          [function: "some_function/1", level: :error]
-        ]
+          level_config: [
+            [application: :my_app, module: Foo.Bar, level: :debug]
+            [function: "some_function/1", level: :error]
+          ]
 
       would set the log level for any module that starts with `Foo.Bar` in application `:my_app` to :debug. In addition
       the log level for any function called `some_function` and that has arity 1 is set to `:error`. Note that if a key
       (ie., :application, :module or :function) is not present then it matches anything.
 
-    * logger_config: If this key is not present then the entire configuration is passed onto the actual logger for configuration.
+    * `logger_config:` If this key is not present then the entire configuration is passed onto the actual logger for configuration.
       In case the configuration of the logger needs to be further restricted, for example, because both `FlexLogger` and
       the logger in question are configured via a `level_config` you can use `logger_config` to provide the actual
       configuration for the logger.
+
+  ### Logger Specific Configuration
 
   `Logger` specific configuration, i.e., not backend specific configuration needs to be specified at the usual place,
   for example
@@ -61,6 +63,8 @@ defmodule FlexLogger do
      config :logger,
         handle_otp_reports: true,
         handle_sasl_reports: true
+
+  ## Supported Backends
 
   `FlexLogger` has been tested with :console and `LoggerFileBackend` but should also work with other logging backends.
 

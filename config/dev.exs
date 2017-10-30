@@ -1,24 +1,33 @@
 use Mix.Config
 
 config :logger,
-       backends: [{FlexLogger, :logger_name},
-                  {FlexLogger, :logger_name2}]
+       backends: [{FlexLogger, :foo_file_logger},
+                  {FlexLogger, :bar_console_logger},
+                  {FlexLogger, :default_logger}]
 
-
-config :logger, :logger_name,
-       logger: LoggerFileBackend,
-       path: "/tmp/foo.log",
+config :logger, :foo_file_logger,
+       logger: LoggerFileBackend, # The actual backend to use (for example :console or LoggerFileBackend)
        default_level: :off, # this is the loggers default level
        level_config: [ # override default levels
-         [module: Foo, level: :info]
+         [module: Foo, level: :info] # available keys are :application, :module, :function
        ],
-       format: "DEV $message" # logger specific configuration
+       path: "/tmp/foo.log", # logger specific configuration
+       format: "FOO $message" # logger specific configuration
 
 
-config :logger, :logger_name2,
+config :logger, :bar_console_logger,
        logger: :console,
        default_level: :off, # this is the loggers default level
        level_config: [ # override default levels
          [module: Bar, level: :info],
        ],
        format: "BAR $message" # logger specific
+
+config :logger, :default_logger,
+       logger: :console,
+       default_level: :debug, # this is the loggers default level
+       level_config: [ # override default levels
+         [module: Bar, level: :off], # not Bar and
+         [module: Foo, level: :off], # not Foo
+       ],
+       format: "DEFAULT $message" # logger specific

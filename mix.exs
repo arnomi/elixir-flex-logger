@@ -4,6 +4,9 @@ defmodule FlexLogger.Mixfile do
   def project do
     [
       app: :flex_logger,
+      source_url: "https://github.com/arnomi/elixir-flex-logger",
+      docs: [main: FlexLogger],
+      package: package(),
       version: "0.1.0",
       elixir: "~> 1.5",
       elixirc_paths: elixirc_paths(Mix.env),
@@ -32,13 +35,10 @@ defmodule FlexLogger.Mixfile do
 
   defp package() do
     [
-      # This option is only needed when you don't want to use the OTP application name
-      name: "flex_logger",
-      # These are the default files included in the package
       files: ["lib", "mix.exs", "README*", "readme*", "LICENSE*", "license*"],
       maintainers: ["Arno Mittelbach"],
-      licenses: ["Apache 2.0"],
-      links: %{"GitHub" => "https://github.com/elixir-ecto/postgrex"}
+      licenses: ["MIT"],
+      links: %{"GitHub" => "https://github.com/arnomi/elixir-flex-logger"}
     ]
   end
 end
