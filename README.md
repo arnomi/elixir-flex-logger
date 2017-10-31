@@ -4,12 +4,12 @@ A flexible logger (backend) that adds module/application specific log levels to 
 
 ## Installation
 
-The package can be installed by adding `flex_logger` to your list of dependencies in `mix.exs`:
+The package can be installed via hex [https://hex.pm/packages/flex_logger](https://hex.pm/packages/flex_logger) by adding `flex_logger` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:flex_logger, "~> 0.1.0"}
+    {:flex_logger, "~> 0.1.5"}
   ]
 end
 ```
