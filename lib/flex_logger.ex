@@ -53,19 +53,19 @@ defmodule FlexLogger do
   ### Backend specific configuration
 
   The entire configuration is passed onto the actual logger for configuration. For example, if you configure
-  the `LoggerFileBackend` which takes a path parmameter you can do this as follows:
+  the `LoggerFileBackend` which takes a `path` parmameter you can do this as follows:
 
-    config :logger,
-       backends: [{FlexLogger, :foo_file_logger}]
+      config :logger,
+         backends: [{FlexLogger, :foo_file_logger}]
 
-    config :logger, :foo_file_logger,
-         logger: LoggerFileBackend, # The actual backend to use (for example :console or LoggerFileBackend)
-         default_level: :off, # this is the loggers default level
-         level_config: [ # override default levels
-           [module: Foo, level: :info] # available keys are :application, :module, :function
-         ],
-         path: "/tmp/foo.log", # backend specific configuration
-         format: "FOO $message" # backend specific configuration
+      config :logger, :foo_file_logger,
+           logger: LoggerFileBackend, # The actual backend to use (for example :console or LoggerFileBackend)
+           default_level: :off, # this is the loggers default level
+           level_config: [ # override default levels
+             [module: Foo, level: :info] # available keys are :application, :module, :function
+           ],
+           path: "/tmp/foo.log", # backend specific configuration
+           format: "FOO $message" # backend specific configuration
 
 
   ### Logger Specific Configuration
