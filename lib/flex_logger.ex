@@ -202,11 +202,11 @@ defmodule FlexLogger do
   end
 
   defp matches?(_, nil), do: true
-  defp matches?(nil, _), do: true
+  defp matches?(nil, _), do: false
   defp matches?(a, b), do: a == b
 
   defp matches_prefix?(_, nil), do: true
-  defp matches_prefix?(nil, _), do: true
+  defp matches_prefix?(nil, _), do: false
   defp matches_prefix?(module, module_prefix) when is_atom(module) do
     matches_prefix?(Atom.to_string(module), module_prefix)
   end
