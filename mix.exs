@@ -7,7 +7,7 @@ defmodule FlexLogger.Mixfile do
       source_url: "https://github.com/arnomi/elixir-flex-logger",
       docs: [main: FlexLogger],
       package: package(),
-      version: "0.1.4",
+      version: "0.1.5",
       description: description(),
       elixir: "~> 1.5",
       elixirc_paths: elixirc_paths(Mix.env),
@@ -35,7 +35,7 @@ defmodule FlexLogger.Mixfile do
   end
 
   defp description() do
-    "FlexLogger is a flexible logger (backend) that adds module/application specific log levels to Elixir's Logger."
+    "FlexLogger adds module/application specific log levels to Elixir's Logger."
   end
 
   defp package() do
