@@ -73,9 +73,9 @@ defmodule FlexLogger do
   `Logger` specific configuration, i.e., not backend specific configuration needs to be specified at the usual place,
   for example
 
-     config :logger,
-        handle_otp_reports: true,
-        handle_sasl_reports: true
+       config :logger,
+          handle_otp_reports: true,
+          handle_sasl_reports: true
 
   ## Supported Backends
 
