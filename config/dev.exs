@@ -11,8 +11,8 @@ config :logger, :foo_file_logger,
        level_config: [ # override default levels
          [module: Foo, level: :info] # available keys are :application, :module, :function
        ],
-       path: "/tmp/foo.log", # logger specific configuration
-       format: "FOO $message" # logger specific configuration
+       path: "/tmp/foo.log", # backend specific configuration
+       format: "FOO $message" # backend specific configuration
 
 
 config :logger, :bar_console_logger,
@@ -21,7 +21,7 @@ config :logger, :bar_console_logger,
        level_config: [ # override default levels
          [module: Bar, level: :info],
        ],
-       format: "BAR $message" # logger specific
+       format: "BAR $message" # backend specific
 
 config :logger, :default_logger,
        logger: :console,
@@ -30,4 +30,4 @@ config :logger, :default_logger,
          [module: Bar, level: :off], # not Bar and
          [module: Foo, level: :off], # not Foo
        ],
-       format: "DEFAULT $message" # logger specific
+       format: "DEFAULT $message" # backend specific

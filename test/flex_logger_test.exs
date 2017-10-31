@@ -125,13 +125,6 @@ defmodule FlexLoggerTest do
     assert %{:configure => [logger: LoggerMockWithoutName, default_level: :debug, foo: :bar]} = mock_state()
   end
 
-  test "can set config indirectly" do
-    reset()
-    config [logger: LoggerMockWithoutName, default_level: :debug, logger_config: [foo: :bar]]
-
-    assert %{:configure => [foo: :bar]} = mock_state()
-  end
-
   defp debug(msg) do
     Logger.debug msg
     Logger.flush()

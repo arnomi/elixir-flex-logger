@@ -50,10 +50,23 @@ defmodule FlexLogger do
       the log level for any function called `some_function` and that has arity 1 is set to `:error`. Note that if a key
       (ie., :application, :module or :function) is not present then it matches anything.
 
-    * `logger_config:` If this key is not present then the entire configuration is passed onto the actual logger for configuration.
-      In case the configuration of the logger needs to be further restricted, for example, because both `FlexLogger` and
-      the logger in question are configured via a `level_config` you can use `logger_config` to provide the actual
-      configuration for the logger.
+  ### Backend specific configuration
+
+  The entire configuration is passed onto the actual logger for configuration. For example, if you configure
+  the `LoggerFileBackend` which takes a path parmameter you can do this as follows:
+
+    config :logger,
+       backends: [{FlexLogger, :foo_file_logger}]
+
+    config :logger, :foo_file_logger,
+         logger: LoggerFileBackend, # The actual backend to use (for example :console or LoggerFileBackend)
+         default_level: :off, # this is the loggers default level
+         level_config: [ # override default levels
+           [module: Foo, level: :info] # available keys are :application, :module, :function
+         ],
+         path: "/tmp/foo.log", # backend specific configuration
+         format: "FOO $message" # backend specific configuration
+
 
   ### Logger Specific Configuration
 
@@ -246,8 +259,7 @@ defmodule FlexLogger do
   end
 
   defp update_logger_config(logger, opts, logger_state) do
-    logger_opts = Keyword.get(opts, :logger_config, opts)
-    {:ok, :ok, updated_logger_state} = logger.handle_call({:configure, logger_opts}, logger_state)
+    {:ok, :ok, updated_logger_state} = logger.handle_call({:configure, opts}, logger_state)
     updated_logger_state
   end
 
