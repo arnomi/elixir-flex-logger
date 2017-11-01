@@ -38,8 +38,9 @@ defmodule FlexLogger do
 
           level_config: [application: :my_app, level: :info]
 
-      Possible configuration options are `:application`, to match the application, `:module` to match a prefix of a module
-      and `:function` to match a particular function. The level is set via `:level`. The following configuration
+      Possible configuration options are `:application`, to match the application, `:module` to match a prefix of a module,
+      `:function` to match a particular function or `:message` to match a particular message (see below).
+      The level is set via `:level`. The following configuration
 
           level_config: [
             [application: :my_app, module: Foo.Bar, level: :debug]
@@ -49,6 +50,18 @@ defmodule FlexLogger do
       would set the log level for any module that starts with `Foo.Bar` in application `:my_app` to :debug. In addition
       the log level for any function called `some_function` and that has arity 1 is set to `:error`. Note that if a key
       (ie., :application, :module or :function) is not present then it matches anything.
+
+      Via the `:message` key you can define specific log levels based on the content of the logged message. This is
+      particularly useful in case of filtering out log messages coming from modules that use Erlang's `:error_logger`
+      in which case no other metadata is available. In case a string is provided for `:message` then `FlexLogger` checks
+      whether the log message contains the provided string. In case a regular expression is given the log message is matched
+      against the regular expression. In case a function with arity 1 is provided, the message is passed to that function
+      which should return a boolean value. Following is an example config that matches the log message against
+      a regular expression
+
+          level_config: [
+            [message: ~r/foo/, level: :debug]
+          ]
 
   ### Backend specific configuration
 
@@ -121,7 +134,7 @@ defmodule FlexLogger do
   end
 
   def handle_event({level, gl, {Logger, msg, ts, md}}, %{logger: logger, logger_state: logger_state} = state) do
-    if should_log?(md, level, state.level, state.level_config) do
+    if should_log?(md, msg, level, state.level, state.level_config) do
       {flag, updated_logger_state} =
         logger.handle_event({level, gl, {Logger, msg, ts, md}}, logger_state)
 
@@ -165,8 +178,8 @@ defmodule FlexLogger do
 
   # helper
 
-  defp should_log?(md, level, default_level, level_config) do
-    case check_level_configs(md, level, level_config) do
+  defp should_log?(md, msg, level, default_level, level_config) do
+    case check_level_configs(md, msg, level, level_config) do
       {:match, do_log?} -> do_log?
       :no_match -> meet_level?(level, default_level)
     end
@@ -183,19 +196,19 @@ defmodule FlexLogger do
   #      {:match, false} - in case the config matches and the log call should not be passed on
   #      {:match, true} - in case the config matches and the log call should be passed on
   #      {:no_match} - in case no config matches
-  defp check_level_configs(_md, _level, nil), do: :no_match
-  defp check_level_configs(_md, _level, []), do: :no_match
+  defp check_level_configs(_md, _msg, _level, nil), do: :no_match
+  defp check_level_configs(_md, _msg, _level, []), do: :no_match
 
-  defp check_level_configs(md, level, [config | level_configs]) do
-    case check_module_against_config(md, level, config) do
+  defp check_level_configs(md, msg, level, [config | level_configs]) do
+    case check_module_against_config(md, msg, level, config) do
       :no_match ->
-        check_level_configs(md, level, level_configs)
+        check_level_configs(md, msg, level, level_configs)
       {:match, level_matches} ->
         {:match, level_matches}
     end
   end
 
-  defp check_module_against_config(md, level, config) do
+  defp check_module_against_config(md, msg, level, config) do
     app = Keyword.get(md, :application, nil)
     module = Keyword.get(md, :module, nil)
     function = Keyword.get(md, :function, nil)
@@ -203,13 +216,15 @@ defmodule FlexLogger do
     allowed_app = Keyword.get(config, :application, nil)
     allowed_module = Keyword.get(config, :module, nil)
     allowed_function = Keyword.get(config, :function, nil)
-    min_level = Keyword.get(config, :level, :debug)
+    msg_matcher = Keyword.get(config, :message, nil)
 
     if (not matches?(app, allowed_app) or
         not matches_prefix?(module, allowed_module) or
-        not matches?(function, allowed_function)) do
+        not matches?(function, allowed_function) or
+        not message_matches?(msg, msg_matcher)) do
       :no_match
     else
+      min_level = Keyword.get(config, :level, :debug)
       {:match, meet_level?(level, min_level)}
     end
   end
@@ -228,6 +243,17 @@ defmodule FlexLogger do
   end
   defp matches_prefix?(module, module_prefix) do
     String.starts_with?(module, module_prefix)
+  end
+
+  defp message_matches?(_, nil), do: true
+  defp message_matches?(msg, msg_matcher) when is_binary(msg_matcher) do
+    String.contains?(msg, msg_matcher)
+  end
+  defp message_matches?(msg, %Regex{}=msg_matcher) do
+    Regex.match?(msg_matcher, msg)
+  end
+  defp message_matches?(msg, msg_matcher) when is_function(msg_matcher) do
+    msg_matcher.(msg)
   end
 
   defp configure(name, opts), do: configure(name, opts, %State{})

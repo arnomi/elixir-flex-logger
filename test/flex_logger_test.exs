@@ -32,6 +32,20 @@ defmodule FlexLoggerTest do
     assert %{:events => [debug: "test message"]} = mock_state()
   end
 
+  test "default_level filters" do
+    config [logger: LoggerMockWithName, default_level: :warn]
+    reset()
+    debug "test message"
+    assert %{:events => []} = mock_state()
+  end
+
+  test "default_level includes" do
+    config [logger: LoggerMockWithName, default_level: :warn]
+    reset()
+    warn "test message"
+    assert %{:events => [warn: "test message"]} = mock_state()
+  end
+
   test "works with unnamed logger" do
     config [logger: LoggerMockWithoutName, default_level: :debug]
     reset()
@@ -118,6 +132,36 @@ defmodule FlexLoggerTest do
     assert %{:events => [warn: "warn"]} = mock_state()
   end
 
+  test "message contains" do
+    config [logger: LoggerMockWithoutName, default_level: :error, level_config: [[message: "foo", level: :debug]]]
+    reset()
+
+    A.warn "foo warn"
+    A.warn "bar warn"
+
+    assert %{:events => [warn: "foo warn"]} = mock_state()
+  end
+
+  test "message regex" do
+    config [logger: LoggerMockWithoutName, default_level: :error, level_config: [[message: ~r/bar/, level: :debug]]]
+    reset()
+
+    A.warn "foo warn"
+    A.warn "bar warn"
+
+    assert %{:events => [warn: "bar warn"]} = mock_state()
+  end
+
+  test "message function" do
+    config [logger: LoggerMockWithoutName, default_level: :error, level_config: [[message: fn msg -> String.contains?(msg, "bar") end, level: :debug]]]
+    reset()
+
+    A.warn "foo warn"
+    A.warn "bar warn"
+
+    assert %{:events => [warn: "bar warn"]} = mock_state()
+  end
+
   test "can set config directly" do
     reset()
     config [logger: LoggerMockWithoutName, default_level: :debug, foo: :bar]
@@ -127,6 +171,11 @@ defmodule FlexLoggerTest do
 
   defp debug(msg) do
     Logger.debug msg
+    Logger.flush()
+  end
+
+  defp warn(msg) do
+    Logger.warn msg
     Logger.flush()
   end
 

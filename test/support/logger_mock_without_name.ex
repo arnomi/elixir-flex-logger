@@ -24,4 +24,7 @@ defmodule LoggerMockWithoutName do
   def handle_event(_, state) do
     {:ok, state}
   end
+
+  def handle_info(_opts, state), do: {:ok, state}
+
 end
