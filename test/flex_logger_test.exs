@@ -163,6 +163,7 @@ defmodule FlexLoggerTest do
   end
 
   test "can set config directly" do
+    config [logger: LoggerMockWithoutName]
     reset()
     config [logger: LoggerMockWithoutName, default_level: :debug, foo: :bar]
 
