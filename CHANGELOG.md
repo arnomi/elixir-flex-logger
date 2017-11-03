@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.2.1 (2017-11-03)
+
+### Fixes
+
+* Make `:message` key work with character lists
+
 ## v0.2.0 (2017-11-01)
 
 ### Enhancements

@@ -142,6 +142,16 @@ defmodule FlexLoggerTest do
     assert %{:events => [warn: "foo warn"]} = mock_state()
   end
 
+  test "message as charlist contains" do
+    config [logger: LoggerMockWithoutName, default_level: :error, level_config: [[message: "foo", level: :debug]]]
+    reset()
+
+    A.warn 'foo warn'
+    A.warn 'bar warn'
+
+    assert %{:events => [warn: 'foo warn']} = mock_state()
+  end
+
   test "message regex" do
     config [logger: LoggerMockWithoutName, default_level: :error, level_config: [[message: ~r/bar/, level: :debug]]]
     reset()
@@ -150,6 +160,16 @@ defmodule FlexLoggerTest do
     A.warn "bar warn"
 
     assert %{:events => [warn: "bar warn"]} = mock_state()
+  end
+
+  test "message regex with charlist" do
+    config [logger: LoggerMockWithoutName, default_level: :error, level_config: [[message: ~r/bar/, level: :debug]]]
+    reset()
+
+    A.warn 'foo warn'
+    A.warn 'bar warn'
+
+    assert %{:events => [warn: 'bar warn']} = mock_state()
   end
 
   test "message function" do

@@ -246,6 +246,9 @@ defmodule FlexLogger do
   end
 
   defp message_matches?(_, nil), do: true
+  defp message_matches?(cl, msg_matcher) when is_list(cl) do
+    message_matches?(to_string(cl), msg_matcher)
+  end
   defp message_matches?(msg, msg_matcher) when is_binary(msg_matcher) do
     String.contains?(msg, msg_matcher)
   end

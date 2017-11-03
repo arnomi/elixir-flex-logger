@@ -7,7 +7,7 @@ defmodule FlexLogger.Mixfile do
       source_url: "https://github.com/arnomi/elixir-flex-logger",
       docs: [main: FlexLogger],
       package: package(),
-      version: "0.2.0",
+      version: "0.2.1",
       description: description(),
       elixir: "~> 1.5",
       elixirc_paths: elixirc_paths(Mix.env),
