@@ -1,3 +1,5 @@
+[![Hex.pm Version](http://img.shields.io/hexpm/v/conform.svg?style=flat)](https://hex.pm/packages/flex_logger)
+
 # FlexLogger
 
 A flexible logger (backend) that adds module/application specific log levels to Elixir's `Logger`.
