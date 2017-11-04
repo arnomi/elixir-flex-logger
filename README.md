@@ -9,7 +9,7 @@ The package can be installed via hex [https://hex.pm/packages/flex_logger](https
 ```elixir
 def deps do
   [
-    {:flex_logger, "~> 0.1.5"}
+    {:flex_logger, "~> 0.2.1"}
   ]
 end
 ```
