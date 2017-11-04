@@ -1,4 +1,4 @@
-[![Hex.pm Version](http://img.shields.io/hexpm/v/conform.svg?style=flat)](https://hex.pm/packages/flex_logger)
+[![Hex.pm](https://img.shields.io/hexpm/v/flex_logger.svg?style=flat)](https://hex.pm/packages/flex_logger)
 
 # FlexLogger
 
